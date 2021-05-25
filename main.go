@@ -9,12 +9,12 @@ import (
 	"strings"
 )
 
-var origin, destiny string
+var origin, destination string
 var verbose bool
 
 func init() {
 	flag.StringVar(&origin, "i", "", "directory of origin")
-	flag.StringVar(&destiny, "o", "", "directory of destiny")
+	flag.StringVar(&destination, "o", "", "directory of destination")
 	flag.BoolVar(&verbose, "v", false, "verbose output")
 	flag.Parse()
 
@@ -22,8 +22,8 @@ func init() {
 		fmt.Println("directory of origin is missing")
 		os.Exit(1)
 	}
-	if destiny == "" {
-		destiny = origin
+	if destination == "" {
+		destination = origin
 	}
 }
 
@@ -34,12 +34,7 @@ func findCbrFiles() []string {
 	if err != nil {
 		panic(err)
 	}
-	lines := strings.Split(string(output), "\n")
-	files := make([]string, len(lines))
-	for i, value := range lines {
-		files[i] = string(value)
-	}
-	return files
+	return strings.Split(string(output), "\n")
 }
 
 func fileExists(filename string) bool {
@@ -48,7 +43,7 @@ func fileExists(filename string) bool {
 }
 
 func cbr2mobi(cbr string) {
-	mobi := strings.Replace(cbr, origin, destiny, 1)
+	mobi := strings.Replace(cbr, origin, destination, 1)
 	mobi = strings.Replace(mobi, ".cbr", ".mobi", 1)
 	if fileExists(mobi) {
 		if verbose {
@@ -66,7 +61,7 @@ func cbr2mobi(cbr string) {
 		fmt.Println(cmd.String())
 	}
 	if err := cmd.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "convertion error: %s\n", err.Error())
+		fmt.Fprintf(os.Stderr, "convertion error: %s\n", err)
 	}
 }
 

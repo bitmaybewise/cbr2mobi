@@ -11,17 +11,16 @@ Convert cbr files to mobi keeping the folder structure.
 Usage of cbr2mobi:
 
     $ cbr2mobi -h
-    Usage of bin/cbr2mobi.mac:
-    -i string
+        -i string
             directory of origin
-    -o string
-            directory of destiny
-    -v	verbose output
+        -o string
+            directory of destination
+        -v	verbose output
 
-It will look for every file inside the folder specified recursively, and output the converted files to the destiny folder, keeping the same folder structure.
+It will look for every file inside the folder specified recursively, and output the converted files to the destination folder, keeping the same folder structure.
 
-    $ cbr2mobi -i /my/folder/of/origin -o /my/folder/of/destiny -v
+    $ cbr2mobi -i /my/folder/of/origin -o /my/folder/of/destination -v
 
-Destiny folder will be equal to origin by default, if not specified.
+Destination folder will be equal to origin by default, if not specified.
 
     $ cbr2mobi -i /my/folder/of/origin
