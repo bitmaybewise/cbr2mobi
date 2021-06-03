@@ -7,15 +7,18 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 var origin, destination string
 var verbose bool
+var pool int
 
 func init() {
 	flag.StringVar(&origin, "i", "", "directory of origin")
 	flag.StringVar(&destination, "o", "", "directory of destination")
 	flag.BoolVar(&verbose, "v", false, "verbose output")
+	flag.IntVar(&pool, "p", 1, "number of parallel convertions")
 	flag.Parse()
 
 	if origin == "" {
@@ -34,7 +37,15 @@ func findCbrFiles() []string {
 	if err != nil {
 		panic(err)
 	}
-	return strings.Split(string(output), "\n")
+	lines := strings.Split(string(output), "\n")
+	files := make([]string, 0)
+	for _, value := range lines {
+		if value == "" {
+			continue
+		}
+		files = append(files, string(value))
+	}
+	return files
 }
 
 func fileExists(filename string) bool {
@@ -80,14 +91,48 @@ func printProgress(current, total int) {
 	fmt.Printf("(%d / %d) %d%s\n", current, total, currentProgress, "%")
 }
 
+type runner struct {
+	sync.Mutex
+	sync.WaitGroup
+	total, done int
+	files       chan string
+}
+
+func (r *runner) UpdateProgress(fn func(done int)) {
+	r.Lock()
+	defer r.Unlock()
+	fn(r.done)
+	r.done++
+}
+
+func (r *runner) NewWorker() {
+	defer r.Done()
+	for dir := range r.files {
+		r.UpdateProgress(func(done int) {
+			printProgress(done, r.total)
+		})
+		cbr2mobi(dir)
+	}
+}
+
+func newRunner(total int) *runner {
+	return &runner{
+		WaitGroup: sync.WaitGroup{},
+		total:     total,
+		files:     make(chan string),
+	}
+}
+
 func main() {
 	files := findCbrFiles()
-	total := len(files) - 1
-	for i, filename := range files {
-		printProgress(i, total)
-		if filename == "" {
-			continue
-		}
-		cbr2mobi(filename)
+	runner := newRunner(len(files))
+	for i := 0; i < pool; i++ {
+		runner.Add(1)
+		go runner.NewWorker()
 	}
+	for _, dir := range files {
+		runner.files <- dir
+	}
+	close(runner.files)
+	runner.Wait()
 }

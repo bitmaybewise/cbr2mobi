@@ -15,6 +15,8 @@ Usage of cbr2mobi:
             directory of origin
         -o string
             directory of destination
+        -p int
+            number of parallel convertions (default 1)
         -v	verbose output
 
 It will look for every file inside the folder specified recursively, and output the converted files to the destination folder, keeping the same folder structure.
