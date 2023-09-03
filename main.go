@@ -67,7 +67,7 @@ func cbr2mobi(cbr string) {
 		fmt.Fprintln(os.Stderr, err)
 	}
 
-	cmd := exec.Command("ebook-convert", cbr, mobi)
+	cmd := exec.Command("ebook-convert", cbr, mobi, "--landscape", "--no-inline-toc", "--mobi-ignore-margins")
 	if verbose {
 		fmt.Println(cmd.String())
 	}
